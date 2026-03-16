@@ -1,6 +1,5 @@
 const express = require("express");
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer");
 
 const app = express();
 app.use(express.json({ limit: "5mb" }));
@@ -14,15 +13,14 @@ app.post("/screenshot", async (req, res) => {
   let browser;
   try {
     browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome-stable",
       args: [
-        ...chromium.args,
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--single-process",
       ],
-      executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: "new",
     });
 
     const page = await browser.newPage();
