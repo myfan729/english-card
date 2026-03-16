@@ -18,17 +18,34 @@ app.post("/screenshot", async (req, res) => {
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-extensions",
+        "--disable-background-networking",
+        "--disable-default-apps",
+        "--disable-sync",
+        "--disable-translate",
+        "--hide-scrollbars",
+        "--metrics-recording-only",
+        "--mute-audio",
+        "--no-first-run",
+        "--safebrowsing-disable-auto-update",
         "--single-process",
+        "--memory-pressure-off",
       ],
       headless: "new",
+      timeout: 30000,
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 640, height: 800, deviceScaleFactor: 2 });
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setViewport({ width: 640, height: 800, deviceScaleFactor: 1 });
+    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 20000 });
+
+    // 폰트 로딩 대기
+    await page.evaluate(() => document.fonts.ready);
 
     const height = await page.evaluate(() => document.body.scrollHeight);
-    await page.setViewport({ width: 640, height: height, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 640, height: Math.min(height, 3000), deviceScaleFactor: 1 });
 
     const screenshot = await page.screenshot({ type: "png", fullPage: true });
     res.set("Content-Type", "image/png");
