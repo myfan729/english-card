@@ -14,16 +14,21 @@ app.post("/screenshot", async (req, res) => {
   let browser;
   try {
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [
+        ...chromium.args,
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--single-process",
+      ],
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
     });
 
     const page = await browser.newPage();
     await page.setViewport({ width: 640, height: 800, deviceScaleFactor: 2 });
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    // 실제 콘텐츠 높이에 맞게 자동 조절
     const height = await page.evaluate(() => document.body.scrollHeight);
     await page.setViewport({ width: 640, height: height, deviceScaleFactor: 2 });
 
